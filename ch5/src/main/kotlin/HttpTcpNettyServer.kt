@@ -1,5 +1,6 @@
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.buffer.Unpooled
+import io.netty.channel.Channel
 import io.netty.channel.ChannelFutureListener
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.ChannelHandlerContext
@@ -21,9 +22,10 @@ class HttpTcpNettyServer(
 ): Server {
     private val bossGroup: EventLoopGroup = NioEventLoopGroup(1)
     private val workerGroup: EventLoopGroup = NioEventLoopGroup()
+    private var channel: Channel? = null
 
     override fun start() {
-        ServerBootstrap()
+        channel = ServerBootstrap()
             .option(ChannelOption.SO_BACKLOG, 50_000)
             .group(bossGroup, workerGroup)
             .channel(NioServerSocketChannel::class.java)
@@ -31,11 +33,10 @@ class HttpTcpNettyServer(
             .bind(port)
             .sync()
             .channel()
-            .closeFuture()
-            .sync()
     }
 
     override fun close() {
+        channel?.closeFuture()?.sync()
         bossGroup.shutdownGracefully()
         workerGroup.shutdownGracefully()
     }

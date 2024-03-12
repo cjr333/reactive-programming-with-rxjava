@@ -9,7 +9,9 @@ open class BlockingServer(
 
     override fun start() {
         executorService.submit {
-            ClientConnection(serverSocket.accept()).run()
+            while (!Thread.currentThread().isInterrupted) {
+                ClientConnection(serverSocket.accept()).run()
+            }
         }
     }
 
