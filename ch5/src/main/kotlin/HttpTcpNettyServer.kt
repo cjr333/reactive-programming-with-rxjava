@@ -1,5 +1,6 @@
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.buffer.Unpooled
+import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInboundHandlerAdapter
 import io.netty.channel.ChannelInitializer
@@ -46,10 +47,11 @@ class HttpInitializer: ChannelInitializer<SocketChannel>() {
         ch
             .pipeline()
             .addLast(HttpServerCodec())
-            .addLast(HttpHandler())
+            .addLast(httpHandler)
     }
 }
 
+@Sharable
 class HttpHandler: ChannelInboundHandlerAdapter() {
     override fun channelReadComplete(ctx: ChannelHandlerContext) {
         ctx.flush()
