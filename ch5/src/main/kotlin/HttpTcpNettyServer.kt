@@ -1,5 +1,6 @@
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.buffer.Unpooled
+import io.netty.channel.ChannelFutureListener
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInboundHandlerAdapter
@@ -72,6 +73,11 @@ class HttpHandler: ChannelInboundHandlerAdapter() {
             headers().add("Content-length", 2)
         }.also {
             ctx.writeAndFlush(it)
+                // .addListener(ChannelFutureListener.CLOSE)
+            // Sharable -> 연결을 유지하며 정상 동작
+            // Sharable + Close listener -> 매번 새로 연결을 맺으면서 정상 동작 (후 연결은 바로 끊김)
+            // No Sharable -> 기존 연결을 유지하며 요청마다 새 연결을 맺으려다 실패. 기존 연결로 응답해서 정상 동작
+            // No Sharable + Close listener -> 기존 연결이 끊김 요청마다 새 연결을 맺으려다 실패. 기존 연결도 끊겨 있어서 응답 불가
         }
     }
 
