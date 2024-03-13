@@ -1,6 +1,7 @@
 package flight
 
 import io.reactivex.rxjava3.core.Observable
+import java.time.LocalDateTime
 import java.util.concurrent.Callable
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
@@ -21,8 +22,10 @@ class TravelAgency(
         }).get()
     }
 
-    fun searchAsync(user: User, location: GeoLocation): CompletableFuture<Flight> =
-        CompletableFuture.supplyAsync { search(user, location) }
+    fun searchAsync(user: User, location: GeoLocation): CompletableFuture<Flight> {
+        println("[${LocalDateTime.now()}] background search started")
+        return CompletableFuture.supplyAsync { search(user, location) }
+    }
 
     fun searchReactive(user: User, location: GeoLocation): Observable<Flight> =
         searchAsync(user, location).toObservable()

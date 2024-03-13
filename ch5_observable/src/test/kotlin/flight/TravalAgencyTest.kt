@@ -2,6 +2,7 @@ package flight
 
 import io.reactivex.rxjava3.core.Observable
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 import java.util.concurrent.CompletableFuture
 import java.util.function.Function
 
@@ -38,25 +39,31 @@ class TravalAgencyTest {
     fun `async - completableFuture2`() {
         val user: CompletableFuture<User> = UserRepository.findByIdAsync(100)
         val geoLocation: CompletableFuture<GeoLocation> = GeoLocationRepository.findByIdAsync(100)
-        val flight: Flight = user.thenCombine(geoLocation) { us, loc ->
+        val flight: CompletableFuture<Flight> = user.thenCombine(geoLocation) { us, loc ->
             agencies.map { it.searchAsync(us, loc) }
                 .reduce { f1, f2 -> f1.applyToEither(f2, Function.identity()) }
                 .get()
-        }.get()
-        println(flight)
+        }
+        Thread.sleep(2000)
+        flight.get().also {
+            println("[${LocalDateTime.now()}] $it")
+        }
     }
 
     @Test
     fun `reactive - nice way using completableFuture`() {
         val user: Observable<User> = UserRepository.findByIdReactive(100)
         val geoLocation: Observable<GeoLocation> = GeoLocationRepository.findByIdReactive(100)
-        val flight: Flight = user.zipWith(geoLocation) { us, loc -> us to loc }
+        val flight: Observable<Flight> = user.zipWith(geoLocation) { us, loc -> us to loc }
             .flatMap { (us, loc) ->
                 Observable.fromIterable(agencies).flatMap { agency ->
                     agency.searchReactive(us, loc)
                 }
-            }.blockingFirst()
-        println(flight)
+            }
+        Thread.sleep(2000)
+        flight.blockingFirst().also {
+            println("[${LocalDateTime.now()}] $it")
+        }
     }
 
     @Test
