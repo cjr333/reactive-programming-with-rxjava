@@ -5,7 +5,7 @@ import rx.Observable
 import java.math.BigDecimal
 import java.nio.charset.StandardCharsets.UTF_8
 
-class EurUsdCurrencyTcpServer(
+class EurUsdCurrencyRxTcpServer(
     port: Int
 ): Server {
     private val server = TcpServer

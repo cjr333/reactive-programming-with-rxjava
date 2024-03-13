@@ -6,5 +6,4 @@ pluginManagement {
     
 }
 rootProject.name = "reactive-programming-with-rxjava"
-include("ch5")
-include("ch5")
+include("ch5_server")
