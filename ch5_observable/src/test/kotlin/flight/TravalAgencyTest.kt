@@ -26,13 +26,23 @@ class TravalAgencyTest {
         val user: CompletableFuture<User> = UserRepository.findByIdAsync(100)
         val geoLocation: CompletableFuture<GeoLocation> = GeoLocationRepository.findByIdAsync(100)
         val flight: Flight = user.thenCombine(geoLocation) { us, loc ->
-            agencies.stream()
-                .map { it.searchAsync(us, loc) }
+            agencies.map { it.searchAsync(us, loc) }
+                .let { CompletableFuture.anyOf(*it.toTypedArray()) }
+                .thenApply { it as Flight }
+                .get()
+        }.get()
+        println(flight)
+    }
+
+    @Test
+    fun `async - completableFuture2`() {
+        val user: CompletableFuture<User> = UserRepository.findByIdAsync(100)
+        val geoLocation: CompletableFuture<GeoLocation> = GeoLocationRepository.findByIdAsync(100)
+        val flight: Flight = user.thenCombine(geoLocation) { us, loc ->
+            agencies.map { it.searchAsync(us, loc) }
                 .reduce { f1, f2 -> f1.applyToEither(f2, Function.identity()) }
                 .get()
-        }
-            .thenCompose(Function.identity())
-            .get()
+        }.get()
         println(flight)
     }
 

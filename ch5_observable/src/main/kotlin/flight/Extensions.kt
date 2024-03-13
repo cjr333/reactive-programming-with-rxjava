@@ -15,3 +15,14 @@ fun <T: Any> CompletableFuture<T>.toObservable(): Observable<T> {
         }
     }
 }
+
+fun <T: Any> Observable<T>.toCompletableFuture(): CompletableFuture<T> {
+    return CompletableFuture<T>().also {
+        this.singleOrError()
+            .subscribe(it::complete, it::completeExceptionally)
+    }
+}
+
+fun <T: Any> Observable<T>.toCompletableFutureList(): CompletableFuture<List<T>> =
+    toList().toObservable().toCompletableFuture()
+
